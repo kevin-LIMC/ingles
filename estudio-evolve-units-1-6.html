@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Estudio interactivo — Evolve 3 (Units 1–6)</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4f;
+      --text: #e8eef5;
+      --muted: #8b9cb3;
+      --accent: #5b9fd4;
+      --accent2: #7c6cf0;
+      --ok: #3ecf8e;
+      --bad: #f07178;
+      --radius: 12px;
+      --font: "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: linear-gradient(160deg, var(--bg) 0%, #151b26 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.55;
+    }
+    header {
+      padding: 1.5rem clamp(1rem, 4vw, 2rem);
+      border-bottom: 1px solid var(--border);
+      background: rgba(26, 35, 50, 0.6);
+      backdrop-filter: blur(8px);
+    }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.35rem; font-weight: 650; }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; max-width: 62ch; }
+    nav.tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem clamp(1rem, 4vw, 2rem);
+    }
+    nav.tabs button {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    nav.tabs button:hover { border-color: var(--accent); }
+    nav.tabs button[aria-selected="true"] {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent;
+      color: #fff;
+    }
+    main { padding: 0 clamp(1rem, 4vw, 2rem) 3rem; max-width: 900px; margin: 0 auto; }
+    section.panel { display: none; animation: fade 0.25s ease; }
+    section.panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 { margin: 0 0 0.75rem; font-size: 1.05rem; color: var(--accent); }
+    .card h3 { margin: 1rem 0 0.5rem; font-size: 0.95rem; }
+    details.unit { margin-bottom: 0.75rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    details.unit summary {
+      cursor: pointer;
+      padding: 0.85rem 1rem;
+      background: rgba(91, 159, 212, 0.12);
+      font-weight: 600;
+      list-style: none;
+    }
+    details.unit summary::-webkit-details-marker { display: none; }
+    details.unit[open] summary { border-bottom: 1px solid var(--border); }
+    .unit-body { padding: 1rem; }
+    label.q { display: block; margin: 0.85rem 0; }
+    label.q span.prompt { display: block; margin-bottom: 0.35rem; font-size: 0.92rem; }
+    input[type="text"], textarea, select {
+      width: 100%;
+      max-width: 100%;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    .choices { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.35rem; }
+    .choices label { font-weight: 400; cursor: pointer; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    button.action {
+      border: none;
+      background: var(--accent);
+      color: #0f1419;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button.action.secondary { background: var(--border); color: var(--text); }
+    .feedback { margin-top: 0.5rem; font-size: 0.88rem; min-height: 1.2em; }
+    .feedback.ok { color: var(--ok); }
+    .feedback.bad { color: var(--bad); }
+    .score-pill {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(62, 207, 142, 0.15);
+      color: var(--ok);
+      font-size: 0.85rem;
+    }
+    ul.tips { margin: 0.5rem 0 0; padding-left: 1.2rem; color: var(--muted); }
+    .en { font-style: italic; color: #c5d4e8; }
+    kbd {
+      font-family: ui-monospace, monospace;
+      font-size: 0.85em;
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Estudio interactivo — Evolve Level 3 (Units 1–6)</h1>
+    <p>
+      Práctica para <strong>grammar</strong>, <strong>writing</strong>, <strong>listening</strong> y <strong>reading</strong>.
+      Abre este archivo en Chrome o Edge. Si tienes el PDF del workbook en esta carpeta, úsalo junto con estas actividades:
+      repite los ejercicios del libro y luego comprueba aquí.
+    </p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" aria-selected="true" data-panel="grammar">Grammar</button>
+    <button type="button" role="tab" aria-selected="false" data-panel="writing">Writing</button>
+    <button type="button" role="tab" aria-selected="false" data-panel="listening">Listening</button>
+    <button type="button" role="tab" aria-selected="false" data-panel="reading">Reading</button>
+    <button type="button" role="tab" aria-selected="false" data-panel="resumen">Resumen rápido</button>
+  </nav>
+
+  <main>
+    <!-- GRAMMAR -->
+    <section id="grammar" class="panel active" role="tabpanel">
+      <div class="card">
+        <h2>Grammar por unidad (quiz corto)</h2>
+        <p style="color:var(--muted);margin:0 0 1rem;font-size:0.92rem;">
+          Elige o escribe. Pulsa <strong>Comprobar esta unidad</strong> al final de cada bloque.
+        </p>
+
+        <details class="unit" open>
+          <summary>Unit 1 — Who we are (preguntas / indirect questions)</summary>
+          <div class="unit-body" data-unit="u1">
+            <label class="q"><span class="prompt">1. Orden correcto (indirect question): “___”</span>
+              <span class="en">I wonder ___.</span>
+              <select data-ans="where he lives">
+                <option value="">— elige —</option>
+                <option value="where does he live">where does he live</option>
+                <option value="where he lives">where he lives</option>
+                <option value="where he does live">where he does live</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">2. Completa (question word): “___ is your favourite subject?”</span>
+              <input type="text" data-ans="What" data-alt="what" placeholder="una palabra" />
+            </label>
+            <label class="q"><span class="prompt">3. Indirect question correcta:</span>
+              <span class="en">Can you tell me ___?</span>
+              <select data-ans="what time the meeting starts">
+                <option value="">— elige —</option>
+                <option value="what time does the meeting start">what time does the meeting start</option>
+                <option value="what time the meeting starts">what time the meeting starts</option>
+              </select>
+            </label>
+            <div class="btn-row">
+              <button type="button" class="action check-unit">Comprobar Unit 1</button>
+              <span class="unit-score score-pill" hidden></span>
+            </div>
+            <div class="feedback unit-feedback"></div>
+          </div>
+        </details>
+
+        <details class="unit">
+          <summary>Unit 2 — So much stuff (present perfect / articles)</summary>
+          <div class="unit-body" data-unit="u2">
+            <label class="q"><span class="prompt">1. “I ___ in London for two years.” (still there)</span>
+              <select data-ans="have lived">
+                <option value="">— elige —</option>
+                <option value="lived">lived</option>
+                <option value="have lived">have lived</option>
+                <option value="am living">am living</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">2. “Have you ___ tried sushi?”</span>
+              <select data-ans="ever">
+                <option value="">— elige —</option>
+                <option value="never">never</option>
+                <option value="ever">ever</option>
+                <option value="yet">yet</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">3. Artículo: “She’s ___ university student.”</span>
+              <input type="text" data-ans="a" data-alt="A" placeholder="a / an / the / —" />
+            </label>
+            <div class="btn-row">
+              <button type="button" class="action check-unit">Comprobar Unit 2</button>
+              <span class="unit-score score-pill" hidden></span>
+            </div>
+            <div class="feedback unit-feedback"></div>
+          </div>
+        </details>
+
+        <details class="unit">
+          <summary>Unit 3 — Smart moves (modals for advice)</summary>
+          <div class="unit-body" data-unit="u3">
+            <label class="q"><span class="prompt">1. Consejo suave: “You ___ talk to your teacher.”</span>
+              <select data-ans="should">
+                <option value="">— elige —</option>
+                <option value="should">should</option>
+                <option value="must">must</option>
+                <option value="can to">can to</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">2. “If I were you, I ___ take a break.”</span>
+              <select data-ans="would">
+                <option value="">— elige —</option>
+                <option value="will">will</option>
+                <option value="would">would</option>
+                <option value="should to">should to</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">3. Escribe un sinónimo de “should” (modal o “ought to”):</span>
+              <input type="text" data-ans="ought to" data-alt="ought|could" placeholder="ej. ought to / could" />
+            </label>
+            <div class="btn-row">
+              <button type="button" class="action check-unit">Comprobar Unit 3</button>
+              <span class="unit-score score-pill" hidden></span>
+            </div>
+            <div class="feedback unit-feedback"></div>
+          </div>
+        </details>
+
+        <details class="unit">
+          <summary>Unit 4 — Think first (future: will / going to / present continuous)</summary>
+          <div class="unit-body" data-unit="u4">
+            <label class="q"><span class="prompt">1. Plan decidido con evidencia: “Look at those clouds! It ___.”</span>
+              <select data-ans="is going to rain">
+                <option value="">— elige —</option>
+                <option value="will rain">will rain</option>
+                <option value="is going to rain">is going to rain</option>
+                <option value="rains">rains</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">2. Decisión espontánea: “I’m thirsty. I ___ a coffee.”</span>
+              <select data-ans="will have">
+                <option value="">— elige —</option>
+                <option value="am going to have">am going to have</option>
+                <option value="will have">will have</option>
+                <option value="have">have</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">3. Cita en agenda: “We ___ at 6 tomorrow.” (arranged)</span>
+              <input type="text" data-ans="are meeting" data-alt="'re meeting|we are meeting|we're meeting" placeholder="use present continuous" />
+            </label>
+            <div class="btn-row">
+              <button type="button" class="action check-unit">Comprobar Unit 4</button>
+              <span class="unit-score score-pill" hidden></span>
+            </div>
+            <div class="feedback unit-feedback"></div>
+          </div>
+        </details>
+
+        <details class="unit">
+          <summary>Unit 5 — And then (past simple / past continuous)</summary>
+          <div class="unit-body" data-unit="u5">
+            <label class="q"><span class="prompt">1. “While I ___, the phone rang.” (acción larga en progreso)</span>
+              <select data-ans="was cooking">
+                <option value="">— elige —</option>
+                <option value="cooked">cooked</option>
+                <option value="was cooking">was cooking</option>
+                <option value="had cooked">had cooked</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">2. “She ___ to Paris last summer.”</span>
+              <input type="text" data-ans="went" placeholder="past simple of go" />
+            </label>
+            <label class="q"><span class="prompt">3. “They ___ TV when I arrived.”</span>
+              <select data-ans="were watching">
+                <option value="">— elige —</option>
+                <option value="watched">watched</option>
+                <option value="were watching">were watching</option>
+                <option value="had watched">had watched</option>
+              </select>
+            </label>
+            <div class="btn-row">
+              <button type="button" class="action check-unit">Comprobar Unit 5</button>
+              <span class="unit-score score-pill" hidden></span>
+            </div>
+            <div class="feedback unit-feedback"></div>
+          </div>
+        </details>
+
+        <details class="unit">
+          <summary>Unit 6 — Impact (quantifiers / first conditional)</summary>
+          <div class="unit-body" data-unit="u6">
+            <label class="q"><span class="prompt">1. “We have very ___ time left.” (poco, sustantivo incontable)</span>
+              <select data-ans="little">
+                <option value="">— elige —</option>
+                <option value="few">few</option>
+                <option value="little">little</option>
+                <option value="a few">a few</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">2. First conditional: “If it rains, we ___ at home.”</span>
+              <select data-ans="will stay">
+                <option value="">— elige —</option>
+                <option value="stay">stay</option>
+                <option value="will stay">will stay</option>
+                <option value="stayed">stayed</option>
+              </select>
+            </label>
+            <label class="q"><span class="prompt">3. “There are too ___ cars in the city.” (contable)</span>
+              <input type="text" data-ans="many" placeholder="many / much" />
+            </label>
+            <div class="btn-row">
+              <button type="button" class="action check-unit">Comprobar Unit 6</button>
+              <span class="unit-score score-pill" hidden></span>
+            </div>
+            <div class="feedback unit-feedback"></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- WRITING -->
+    <section id="writing" class="panel" role="tabpanel">
+      <div class="card">
+        <h2>Writing — plantilla y práctica</h2>
+        <p style="color:var(--muted);font-size:0.92rem;">
+          En el examen sueles tener un texto corto (email, post, review, opinion). Estructura: introducción → ideas con conectores → conclusión.
+        </p>
+        <h3>Conectores útiles (B1)</h3>
+        <ul class="tips">
+          <li><span class="en">First / Firstly, … Then / Next, … Finally, …</span></li>
+          <li><span class="en">However, … / Although …, … / Because … / So …</span></li>
+          <li><span class="en">In my opinion, … / I think … / I would suggest …</span></li>
+        </ul>
+        <h3>Prompt de práctica</h3>
+        <p class="en">Write an email to a friend (120–150 words). Invite them to an event next weekend, explain why it will be fun, and ask them to reply.</p>
+        <textarea id="writingDraft" placeholder="Escribe tu borrador en inglés aquí…"></textarea>
+        <div class="btn-row">
+          <button type="button" class="action" id="checkWriting">Autochequeo (lista)</button>
+          <button type="button" class="action secondary" id="countWords">Contar palabras</button>
+        </div>
+        <div id="writingFeedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <!-- LISTENING -->
+    <section id="listening" class="panel" role="tabpanel">
+      <div class="card">
+        <h2>Listening — técnica + dictado ligero</h2>
+        <ul class="tips">
+          <li>Antes de escuchar: lee las preguntas; subraya <strong>palabras clave</strong> (nombres, números, verbos).</li>
+          <li>Primera escucha: idea general (gist). Segunda: detalles.</li>
+          <li>Atención a <span class="en">numbers, dates, prices, names</span> y a palabras de reformulación (<span class="en">actually, I mean, in other words</span>).</li>
+        </ul>
+        <h3>Práctica tipo examen — frases al azar (Evolve 3, Units 1–6)</h3>
+        <p style="color:var(--muted);font-size:0.92rem;">
+          No hay un PDF del libro en esta carpeta todavía: aquí hay un <strong>banco de frases</strong> con el mismo tipo de estructuras y temas que suele traer el workbook (identidad, consumo, consejos, futuro, pasado, medio ambiente y condicionales).
+          Pulsa <strong>Frase al azar</strong>, escucha y escribe. Si más adelante pegas líneas reales de tu archivo, sustituye el banco en el HTML (busca <code>LISTEN_BANK</code>).
+        </p>
+        <p id="listenMeta" style="margin:0.5rem 0;font-size:0.88rem;color:var(--accent);min-height:1.2em;"></p>
+        <div class="btn-row" style="align-items:center;">
+          <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;color:var(--muted);">
+            Unidad
+            <select id="listenUnitFilter" style="width:auto;min-width:7rem;">
+              <option value="0">Todas (1–6)</option>
+              <option value="1">Unit 1</option>
+              <option value="2">Unit 2</option>
+              <option value="3">Unit 3</option>
+              <option value="4">Unit 4</option>
+              <option value="5">Unit 5</option>
+              <option value="6">Unit 6</option>
+            </select>
+          </label>
+          <button type="button" class="action" id="listenRandom">Frase al azar</button>
+          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;color:var(--muted);cursor:pointer;">
+            <input type="checkbox" id="listenExam" />
+            Modo examen (oculta la frase)
+          </label>
+          <button type="button" class="action secondary" id="listenReveal" hidden>Mostrar frase</button>
+        </div>
+        <h3 style="margin-top:1.25rem;">Dictado con voz del navegador</h3>
+        <p style="color:var(--muted);font-size:0.92rem;">
+          Usa <strong>Chrome</strong> o <strong>Edge</strong>. Si no oyes nada: volumen del sistema y en Windows <kbd>Win</kbd> → Configuración → Hora e idioma → <strong>Voz</strong> → voz en inglés instalada.
+        </p>
+        <textarea id="listenText" rows="3" placeholder="Pulsa “Frase al azar” o pega aquí tu propia frase del libro."></textarea>
+        <div class="btn-row">
+          <button type="button" class="action secondary" id="listenSample">Texto de prueba fijo</button>
+        </div>
+        <p id="listenTtsStatus" class="feedback" style="min-height:1.4em;margin-top:0.5rem;" aria-live="polite"></p>
+        <div class="btn-row">
+          <button type="button" class="action" id="speakText">Leer en voz alta (inglés)</button>
+          <button type="button" class="action secondary" id="stopSpeak">Parar</button>
+        </div>
+        <label class="q"><span class="prompt">Escribe lo que has oído:</span>
+          <textarea id="listenWrite" rows="3" placeholder="Your dictation…"></textarea>
+        </label>
+        <div class="btn-row">
+          <button type="button" class="action" id="compareDict">Comparar con el original</button>
+        </div>
+        <div id="dictFeedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <!-- READING -->
+    <section id="reading" class="panel" role="tabpanel">
+      <div class="card">
+        <h2>Reading — texto + comprensión</h2>
+        <p style="color:var(--muted);font-size:0.92rem;">Lee el texto y responde. Luego “Comprobar reading”.</p>
+        <div style="background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border);font-size:0.92rem;">
+          <p class="en" style="margin:0 0 0.75rem;"><strong>City gardens</strong></p>
+          <p class="en" style="margin:0;">
+            More young people are starting community gardens in cities. They grow vegetables on rooftops and in empty lots.
+            Volunteers say it helps the environment and brings neighbours together. The group meets every Saturday morning,
+            and new members are always welcome. Next month, they will open a small market to sell extra produce.
+          </p>
+        </div>
+        <label class="q"><span class="prompt">1. What do volunteers say are two benefits?</span>
+          <input type="text" id="r1" placeholder="short answer in English" />
+        </label>
+        <label class="q"><span class="prompt">2. When does the group meet?</span>
+          <select id="r2">
+            <option value="">— choose —</option>
+            <option value="a">Every Sunday evening</option>
+            <option value="b">Every Saturday morning</option>
+            <option value="c">Only in summer</option>
+          </select>
+        </label>
+        <label class="q"><span class="prompt">3. What will happen next month?</span>
+          <input type="text" id="r3" placeholder="one sentence in English" />
+        </label>
+        <div class="btn-row">
+          <button type="button" class="action" id="checkReading">Comprobar reading</button>
+        </div>
+        <div id="readFeedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <!-- RESUMEN -->
+    <section id="resumen" class="panel" role="tabpanel">
+      <div class="card">
+        <h2>Resumen rápido (Units 1–6)</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);text-align:left;">
+              <th style="padding:0.4rem;">Unit</th>
+              <th style="padding:0.4rem;">Grammar focus</th>
+            </tr>
+          </thead>
+          <tbody style="color:var(--muted);">
+            <tr><td style="padding:0.35rem;">1</td><td>Questions &amp; indirect questions</td></tr>
+            <tr><td style="padding:0.35rem;">2</td><td>Present perfect (for/since, ever/never, already/yet); articles</td></tr>
+            <tr><td style="padding:0.35rem;">3</td><td>Modals for advice</td></tr>
+            <tr><td style="padding:0.35rem;">4</td><td>Will / going to / present continuous for future</td></tr>
+            <tr><td style="padding:0.35rem;">5</td><td>Past simple &amp; past continuous</td></tr>
+            <tr><td style="padding:0.35rem;">6</td><td>Quantifiers; first conditional</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:1rem;color:var(--muted);font-size:0.9rem;">
+          Consejo: haz una sesión por habilidad (un día grammar, otro listening, etc.) y repite los errores al día siguiente.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      function norm(s) {
+        return (s || "").trim().replace(/\s+/g, " ").toLowerCase();
+      }
+
+      function normDict(s) {
+        return norm(s)
+          .replace(/['']/g, "'")
+          .replace(/[.,;:!?…"""''`\-]/g, "")
+          .replace(/\s+/g, " ");
+      }
+
+      /** Frases estilo Evolve 3 (B1): mismas unidades/temas que el workbook. Sustituye por transcripciones del PDF si las tienes. */
+      var LISTEN_BANK = [
+        { unit: 1, topic: "Indirect questions", text: "Could you tell me where the library is?" },
+        { unit: 1, topic: "Indirect questions", text: "I wonder what time our class starts tomorrow." },
+        { unit: 1, topic: "Wh-questions", text: "Do you know how long the train journey usually takes?" },
+        { unit: 1, topic: "Indirect questions", text: "I'd like to find out why he changed his mind about the trip." },
+        { unit: 1, topic: "Indirect questions", text: "Can you tell me whether the museum is open on Mondays?" },
+        { unit: 1, topic: "Questions", text: "How often do you meet your study group after class?" },
+        { unit: 2, topic: "Present perfect + since", text: "I have lived in this neighbourhood since I was ten years old." },
+        { unit: 2, topic: "Present perfect + ever", text: "Have you ever tried cooking with only local ingredients?" },
+        { unit: 2, topic: "Present perfect + yet", text: "We haven't finished unpacking all the boxes yet." },
+        { unit: 2, topic: "Present perfect + already", text: "She has already watched the whole series twice." },
+        { unit: 2, topic: "Present perfect + for", text: "He's worked part-time at the café for six months." },
+        { unit: 2, topic: "Articles / stuff", text: "There isn't much space left in my wardrobe." },
+        { unit: 2, topic: "Present perfect", text: "I've had this phone for two years and it still works well." },
+        { unit: 2, topic: "Present perfect", text: "I've never been to a live concert before." },
+        { unit: 3, topic: "Advice (should)", text: "You should speak to your teacher if you don't understand the task." },
+        { unit: 3, topic: "Advice (If I were you)", text: "If I were you, I would delete the apps you never open." },
+        { unit: 3, topic: "Advice (could)", text: "Maybe you could walk to work one day a week." },
+        { unit: 3, topic: "Advice (ought to)", text: "We ought to turn off the lights when we leave the room." },
+        { unit: 3, topic: "Modals", text: "You mustn't forget to save your document before you close the laptop." },
+        { unit: 4, topic: "Arranged future", text: "I'm meeting Sara at the cinema at half past seven this evening." },
+        { unit: 4, topic: "Going to (prediction)", text: "Look at those clouds — I think it's going to rain later tonight." },
+        { unit: 4, topic: "Will (instant decision)", text: "I'm really thirsty — I'll get a bottle of water from the shop." },
+        { unit: 4, topic: "Future plan", text: "We're flying to Berlin next month for a long weekend." },
+        { unit: 4, topic: "Going to", text: "He's going to study engineering at university starting next year." },
+        { unit: 5, topic: "Past continuous + simple", text: "I was cycling home when I realised I'd forgotten my keys." },
+        { unit: 5, topic: "Past continuous", text: "While she was studying, her phone rang several times." },
+        { unit: 5, topic: "Past simple", text: "They visited several museums when they were in Madrid last spring." },
+        { unit: 5, topic: "Past continuous", text: "What were you doing at nine o'clock yesterday evening?" },
+        { unit: 5, topic: "Past continuous + simple", text: "I dropped my bag while I was running for the bus." },
+        { unit: 6, topic: "First conditional", text: "If we use public transport more, we will reduce air pollution in the city." },
+        { unit: 6, topic: "Quantifiers (too many)", text: "There are too many cars driving through the old town centre." },
+        { unit: 6, topic: "Quantifiers (few)", text: "Few people realise how much water a long shower wastes every day." },
+        { unit: 6, topic: "First conditional", text: "If you practise listening for ten minutes a day, you will improve quite quickly." },
+        { unit: 6, topic: "Quantifiers (too much)", text: "There is too much plastic packaging in most supermarkets these days." },
+        { unit: 6, topic: "First conditional", text: "If it rains tomorrow afternoon, the picnic in the park will be cancelled." },
+        { unit: 6, topic: "Environment", text: "If we don't act now, the problem for local wildlife will get worse." },
+        { unit: 2, topic: "Present perfect", text: "She hasn't replied to my message yet, but I'm sure she's busy." },
+        { unit: 4, topic: "Present continuous (future)", text: "We're having dinner with my cousins on Saturday night." },
+        { unit: 1, topic: "Indirect questions", text: "Do you know how much a student ticket costs for the concert?" }
+      ];
+
+      // Tabs
+      document.querySelectorAll("nav.tabs button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-panel");
+          document.querySelectorAll("nav.tabs button").forEach(function (b) {
+            b.setAttribute("aria-selected", b === btn ? "true" : "false");
+          });
+          document.querySelectorAll("main section.panel").forEach(function (p) {
+            p.classList.toggle("active", p.id === id);
+          });
+        });
+      });
+
+      // Grammar units
+      document.querySelectorAll(".check-unit").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var body = btn.closest(".unit-body");
+          var labels = body.querySelectorAll("label.q");
+          var correct = 0;
+          var total = 0;
+          labels.forEach(function (lab) {
+            var sel = lab.querySelector("select[data-ans]");
+            var inp = lab.querySelector("input[data-ans]");
+            var ok = false;
+            if (sel) {
+              total++;
+              ok = norm(sel.value) === norm(sel.getAttribute("data-ans"));
+              if (!ok) sel.style.borderColor = "var(--bad)"; else sel.style.borderColor = "var(--ok)";
+            } else if (inp) {
+              total++;
+              var expected = norm(inp.getAttribute("data-ans"));
+              var alts = (inp.getAttribute("data-alt") || "")
+                .split("|")
+                .map(function (a) {
+                  return norm(a);
+                })
+                .filter(Boolean);
+              var val = norm(inp.value);
+              ok = val === expected || alts.indexOf(val) !== -1;
+              inp.style.borderColor = ok ? "var(--ok)" : "var(--bad)";
+            }
+            if (ok) correct++;
+          });
+          var fb = body.querySelector(".unit-feedback");
+          var pill = body.querySelector(".unit-score");
+          pill.hidden = false;
+          pill.textContent = correct + " / " + total + " correctas";
+          fb.className = "feedback unit-feedback " + (correct === total ? "ok" : "bad");
+          fb.textContent =
+            correct === total
+              ? "Perfect. Repite mañana sin mirar."
+              : "Revisa la teoría de esa unidad en el libro y vuelve a intentar.";
+        });
+      });
+
+      // Writing
+      document.getElementById("checkWriting").addEventListener("click", function () {
+        var t = document.getElementById("writingDraft").value;
+        var issues = [];
+        if (t.trim().length < 40) issues.push("El texto parece muy corto (apunta a ~120+ palabras en el examen).");
+        if (!/I('| a)m writing|Dear |Hi /i.test(t)) issues.push("Añade un saludo claro (ej. Hi …, / Dear …,).");
+        if (!/(\?|please|could you|write back|let me know)/i.test(t)) issues.push("Incluye una petición o pregunta al final (invitar + pedir respuesta).");
+        if (!/[.!?]/.test(t)) issues.push("Revisa puntuación: frases completas con . ? !");
+        var fb = document.getElementById("writingFeedback");
+        fb.className = "feedback " + (issues.length ? "bad" : "ok");
+        fb.textContent = issues.length ? issues.join(" ") : "Bien: tienes elementos básicos. Pide a alguien que corrija errores de tiempo verbal.";
+      });
+      document.getElementById("countWords").addEventListener("click", function () {
+        var w = document.getElementById("writingDraft").value.trim().split(/\s+/).filter(Boolean).length;
+        document.getElementById("writingFeedback").className = "feedback ok";
+        document.getElementById("writingFeedback").textContent = "Palabras: " + w + " (objetivo aprox. 120–150 si el examen lo pide).";
+      });
+
+      // Listening — banco aleatorio + Web Speech API
+      var listenCanonical = null;
+      var listenLastKey = null;
+      var listenStatus = document.getElementById("listenTtsStatus");
+      var listenTa = document.getElementById("listenText");
+      var listenMeta = document.getElementById("listenMeta");
+      var listenExamEl = document.getElementById("listenExam");
+      var listenRevealBtn = document.getElementById("listenReveal");
+
+      function setListenStatus(msg, cls) {
+        listenStatus.textContent = msg || "";
+        listenStatus.className = "feedback " + (cls || "");
+      }
+
+      function filterListenBank() {
+        var u = parseInt(document.getElementById("listenUnitFilter").value, 10) || 0;
+        return LISTEN_BANK.filter(function (row) {
+          return u === 0 || row.unit === u;
+        });
+      }
+
+      function applyListenPhrase(item) {
+        listenCanonical = item.text;
+        listenMeta.textContent = "Unit " + item.unit + " — " + item.topic + " (" + filterListenBank().length + " frases en este filtro)";
+        document.getElementById("dictFeedback").textContent = "";
+        document.getElementById("dictFeedback").className = "feedback";
+        document.getElementById("listenWrite").value = "";
+        var exam = listenExamEl.checked;
+        if (exam) {
+          listenTa.value = "";
+          listenTa.readOnly = true;
+          listenTa.placeholder = "(Frase oculta: escucha y escribe abajo.)";
+          listenRevealBtn.hidden = false;
+        } else {
+          listenTa.readOnly = false;
+          listenTa.placeholder = "Puedes pegar aquí una frase de tu libro o usar “Frase al azar”.";
+          listenTa.value = item.text;
+          listenRevealBtn.hidden = true;
+        }
+      }
+
+      function pickRandomListenPhrase() {
+        var pool = filterListenBank();
+        if (!pool.length) {
+          setListenStatus("No hay frases para esa unidad.", "bad");
+          return;
+        }
+        var item = null;
+        var tries;
+        for (tries = 0; tries < 24; tries++) {
+          item = pool[Math.floor(Math.random() * pool.length)];
+          var key = item.unit + "|" + item.text;
+          if (pool.length < 2 || key !== listenLastKey) {
+            listenLastKey = key;
+            break;
+          }
+        }
+        applyListenPhrase(item);
+        setListenStatus("Nueva frase. Pulsa “Leer en voz alta” (puedes repetir el audio varias veces).", "ok");
+      }
+
+      function getListenSpeakText() {
+        if (listenTa.readOnly && listenCanonical) return listenCanonical.trim();
+        var v = listenTa.value.trim();
+        return v || (listenCanonical || "").trim();
+      }
+
+      function getListenCompareOriginal() {
+        if (listenTa.readOnly && listenCanonical) return listenCanonical.trim();
+        return listenTa.value.trim();
+      }
+
+      function getVoicesList() {
+        try {
+          return speechSynthesis.getVoices() || [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function pickEnglishVoice() {
+        var voices = getVoicesList();
+        var i;
+        var v;
+        for (i = 0; i < voices.length; i++) {
+          v = voices[i];
+          if (!v.lang) continue;
+          if (v.lang.toLowerCase().indexOf("en") !== 0) continue;
+          if (v.localService) return v;
+        }
+        for (i = 0; i < voices.length; i++) {
+          v = voices[i];
+          if (v.lang && v.lang.toLowerCase().indexOf("en") === 0) return v;
+        }
+        return voices.length ? voices[0] : null;
+      }
+
+      function speakListenText() {
+        if (typeof speechSynthesis === "undefined") {
+          setListenStatus(
+            "Tu navegador no expone síntesis de voz aquí. Abre este archivo en Chrome o Edge actualizado.",
+            "bad"
+          );
+          return;
+        }
+
+        var text = getListenSpeakText();
+        if (!text) {
+          setListenStatus("Pulsa “Frase al azar”, pega una frase, o “Texto de prueba fijo”.", "bad");
+          return;
+        }
+
+        function doSpeak() {
+          speechSynthesis.cancel();
+          window.setTimeout(function () {
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = "en-US";
+            u.rate = 0.9;
+            var voice = pickEnglishVoice();
+            if (voice) {
+              u.voice = voice;
+              u.lang = voice.lang || u.lang;
+            }
+            u.onstart = function () {
+              setListenStatus("Reproduciendo… (voz: " + (voice && voice.name ? voice.name : "predeterminada") + ")", "ok");
+            };
+            u.onend = function () {
+              setListenStatus("Fin del audio. Escribe tu dictado abajo y pulsa “Comparar”.", "ok");
+            };
+            u.onerror = function (ev) {
+              setListenStatus(
+                "Error de audio: " + (ev && ev.error ? ev.error : "desconocido") + ". Prueba otro navegador o revisa voces en Configuración de Windows.",
+                "bad"
+              );
+            };
+            try {
+              speechSynthesis.resume();
+            } catch (e1) {}
+            speechSynthesis.speak(u);
+          }, 50);
+        }
+
+        var voices = getVoicesList();
+        if (voices.length === 0) {
+          setListenStatus("Cargando voces del sistema… vuelve a pulsar si no empieza en 2 segundos.", "");
+          var done = false;
+          function trySpeak() {
+            if (done) return;
+            if (getVoicesList().length > 0) {
+              done = true;
+              doSpeak();
+            }
+          }
+          speechSynthesis.addEventListener("voiceschanged", trySpeak);
+          try {
+            speechSynthesis.getVoices();
+          } catch (e2) {}
+          trySpeak();
+          window.setTimeout(function () {
+            trySpeak();
+            if (!done && getVoicesList().length === 0) {
+              setListenStatus(
+                "No hay voces disponibles. En Edge/Chrome, instala “English” en Configuración → Hora e idioma → Voz, y recarga la página.",
+                "bad"
+              );
+            }
+          }, 2000);
+          return;
+        }
+
+        doSpeak();
+      }
+
+      document.getElementById("listenRandom").addEventListener("click", pickRandomListenPhrase);
+
+      listenExamEl.addEventListener("change", function () {
+        if (!listenCanonical) return;
+        if (listenExamEl.checked) {
+          listenTa.value = "";
+          listenTa.readOnly = true;
+          listenTa.placeholder = "(Frase oculta: escucha y escribe abajo.)";
+          listenRevealBtn.hidden = false;
+        } else {
+          listenTa.readOnly = false;
+          listenTa.value = listenCanonical;
+          listenTa.placeholder = "Puedes pegar aquí una frase de tu libro o usar “Frase al azar”.";
+          listenRevealBtn.hidden = true;
+        }
+      });
+
+      listenRevealBtn.addEventListener("click", function () {
+        if (!listenCanonical) return;
+        listenTa.value = listenCanonical;
+        listenTa.readOnly = false;
+        listenRevealBtn.hidden = true;
+        setListenStatus("Frase visible (modo estudio).", "ok");
+      });
+
+      document.getElementById("listenSample").addEventListener("click", function () {
+        listenCanonical = null;
+        listenLastKey = null;
+        listenMeta.textContent = "Texto fijo de prueba (no es del banco aleatorio).";
+        listenTa.readOnly = false;
+        listenTa.placeholder = "Puedes pegar aquí una frase de tu libro o usar “Frase al azar”.";
+        listenTa.value = "If we miss the train, we will take a taxi to the station.";
+        listenRevealBtn.hidden = true;
+        document.getElementById("listenWrite").value = "";
+        document.getElementById("dictFeedback").textContent = "";
+        setListenStatus("Texto de prueba listo. Pulsa “Leer en voz alta”.", "ok");
+      });
+
+      document.getElementById("speakText").addEventListener("click", speakListenText);
+      document.getElementById("stopSpeak").addEventListener("click", function () {
+        speechSynthesis.cancel();
+        setListenStatus("Audio detenido.", "");
+      });
+
+      if (typeof speechSynthesis !== "undefined") {
+        speechSynthesis.addEventListener("voiceschanged", function () {});
+        speechSynthesis.getVoices();
+      }
+
+      document.getElementById("compareDict").addEventListener("click", function () {
+        var raw = getListenCompareOriginal();
+        var user = document.getElementById("listenWrite").value.trim();
+        var fb = document.getElementById("dictFeedback");
+        if (!raw || !user) {
+          fb.className = "feedback bad";
+          fb.textContent = "Necesitas una frase de referencia (al azar o en la caja de arriba) y tu dictado abajo.";
+          return;
+        }
+        var o = normDict(raw);
+        var u = normDict(user);
+        var sim = o === u;
+        fb.className = "feedback " + (sim ? "ok" : "bad");
+        if (sim) {
+          fb.textContent = "¡Perfecto! Pulsa “Frase al azar” para otra. (La comparación ignora mayúsculas y puntuación simple.)";
+          return;
+        }
+        var wordsO = o.split(" ").filter(Boolean);
+        var wordsU = u.split(" ").filter(Boolean);
+        var setO = {};
+        var i;
+        for (i = 0; i < wordsO.length; i++) setO[wordsO[i]] = true;
+        var hit = 0;
+        for (i = 0; i < wordsU.length; i++) {
+          if (setO[wordsU[i]]) hit++;
+        }
+        var pct = wordsU.length ? Math.round((hit / wordsU.length) * 100) : 0;
+        fb.textContent =
+          "No coincide del todo. Palabras acertadas (aprox.): " +
+          pct +
+          "%. Escucha otra vez; si quieres ver la frase, pulsa “Mostrar frase” (solo estudio).";
+      });
+
+      listenMeta.textContent =
+        "Banco: " + LISTEN_BANK.length + " frases tipo workbook (Units 1–6). Elige unidad o “Todas” y pulsa “Frase al azar”.";
+
+      // Reading
+      document.getElementById("checkReading").addEventListener("click", function () {
+        var s1 = norm(document.getElementById("r1").value);
+        var s2 = document.getElementById("r2").value;
+        var s3 = norm(document.getElementById("r3").value);
+        var pts = 0;
+        if (s1.includes("environment") && (s1.includes("neighbour") || s1.includes("neighbor") || s1.includes("together"))) pts++;
+        if (s2 === "b") pts++;
+        if (s3.includes("market") && (s3.includes("sell") || s3.includes("open") || s3.includes("produce"))) pts++;
+        var fb = document.getElementById("readFeedback");
+        fb.className = "feedback " + (pts === 3 ? "ok" : "bad");
+        fb.textContent =
+          pts === 3
+            ? "3/3 — Excelente comprensión."
+            : "Puntuación: " + pts + "/3. Vuelve al texto y busca la evidencia exacta para cada pregunta.";
+      });
+    })();
+  </script>
+</body>
+</html>
